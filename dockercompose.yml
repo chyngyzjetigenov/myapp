@@ -1,0 +1,7 @@
+services:
+  my_service:
+    restart: always
+    image: chyngyz91/goapp.my_service:latest
+    container_name: go-my_service
+     ports:22
+      - 8080:8080

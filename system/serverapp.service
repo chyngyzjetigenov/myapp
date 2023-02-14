@@ -1,0 +1,16 @@
+[Unit]
+Description=My Server App
+ConditionPathExists=/home/jetigenov/Documents/Tasks1
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/jetigenov/Documents/Tasks1
+ExecStart=/usr/bin/go run .
+User=jetigenov
+Environment=ENV=production
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
