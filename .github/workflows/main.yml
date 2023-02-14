@@ -24,7 +24,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-app-go:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-app-go2
       - name: Deploy APIService
         uses: dawidd6/action-ansible-playbook@v2
         with:
