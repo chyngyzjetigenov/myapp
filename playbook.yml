@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: true
+  vars:
+    app_path: /home/jetigenov/myapp
+  tasks:
+    - name: "create {{ app_path }}/"
+      file:
+        path: "{{ app_path }}/"
+        state: "directory"
+        owner: "jetigenov"
+        group: "jetigenov"
+        mode: 0775
+      become: yes
+      become_method: sudo
+
+    - name: "copy dockercompose.yml"
+      copy:
+        src: "dockercompose.yml"
+        dest: "{{ app_path }}/dockercompose.yml"
+        owner: "jetigenov"
+        group: "jetigenov"
+        mode: 0644
+      become: yes
+      become_method: sudo
+
+    - name: "stop services"
+      shell: dockercompose -f {{ app_path }}/dockercompose.yml stop
+
+    - name: "pull images"
+      shell: dockercompose -f {{ app_path }}/dockercompose.yml pull
+
+    - name: "start services"
+      shell: dockercompose -f {{ app_path }}/dockercompose.yml up -d
