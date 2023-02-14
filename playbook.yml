@@ -1,34 +1,26 @@
----
-- hosts: all
-  gather_facts: true
-  vars:
-    app_path: /home/jetigenov/myapp
-  tasks:
-    - name: "create {{ app_path }}/"
-      file:
-        path: "{{ app_path }}/"
-        state: "directory"
-        owner: "jetigenov"
-        group: "jetigenov"
-        mode: 0775
-      become: yes
-      become_method: sudo
+- name: Install dependencies
+  apt:
+    name: golang
 
-    - name: "copy dockercompose.yml"
-      copy:
-        src: "dockercompose.yml"
-        dest: "{{ app_path }}/dockercompose.yml"
-        owner: "jetigenov"
-        group: "jetigenov"
-        mode: 0644
-      become: yes
-      become_method: sudo
+- name: Copy application files
+  copy:
+    src: /home/jetigenov/myapp
+    dest: /opt/myapp
 
-    - name: "stop services"
-      shell: dockercompose -f {{ app_path }}/dockercompose.yml stop
+- name: Build application
+  command: go build -o /opt/myapp/myapp /opt/myapp/main.go
 
-    - name: "pull images"
-      shell: dockercompose -f {{ app_path }}/dockercompose.yml pull
+- name: Create systemd service
+  copy:
+    src: system/serverapp.service
+    dest: /etc/systemd/system/serverapp.service
 
-    - name: "start services"
-      shell: dockercompose -f {{ app_path }}/dockercompose.yml up -d
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start systemd service
+  systemd:
+    name: myapp
+    enabled: yes
+    state: started
