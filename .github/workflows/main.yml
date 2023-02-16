@@ -7,6 +7,7 @@ on:
 
 env:
   SERVICE_NAME: chyngyz91
+  IMAGE_TAG: ${{ github.sha }}
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -39,15 +40,20 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          file: ./Dockerfile
           push: true
-          tags: chyngyz91/myappgo
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myappgo:latest
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
 
     steps:
-   
 
       - name: Deploy with Ansible
         run: |
-         ansible-playbook -i ./hosts ./playbook.yml
+          ansible-playbook \
+          -i ${{ env.ANSIBLE_INVENTORY }} \
+          -u ${{ env.REMOTE_USER }} \
+          --become --become-user=root \
+          --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" \
+          ${{ env.ANSIBLE_PLAYBOOK }}
