@@ -15,7 +15,7 @@ env:
   REMOTE_USER: my-remote-user
   REMOTE_HOST: 192.168.1.112
   ANSIBLE_INVENTORY: hosts
-  ANSIBLE_PLAYBOOK: playbook.yaml
+  ANSIBLE_PLAYBOOK: playbook.yml
 
 jobs:
   build-and-push:
