@@ -43,5 +43,4 @@ jobs:
     steps:
           
       - name: Deploy with Ansible
-        run: |
-          ansible-playbook --user $USER -i ./hosts.yaml --become --become-user=root ./playbook.yaml
+        run: ansible-playbook --user $USER -i ./hosts.yaml --become --become-user=root ./playbook.yaml
