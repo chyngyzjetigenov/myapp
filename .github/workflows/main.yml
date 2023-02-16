@@ -9,7 +9,11 @@ env:
   SERVICE_NAME: chyngyz91
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} 
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+  REMOTE_USER: my-remote-user
+  REMOTE_HOST: 123.45.67.89
   ANSIBLE_INVENTORY: hosts
   ANSIBLE_PLAYBOOK: playbook.yaml
 
@@ -37,3 +41,29 @@ jobs:
           context: .
           push: true
           tags: chyngyz91/myappgo
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Copy SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with Ansible
+        run: |
+          sshpass -p "${{ secrets.REMOTE_PASSWORD }}" ansible-playbook \
+          -i ${{ env.ANSIBLE_INVENTORY }} \
+          -u ${{ env.REMOTE_USER }} \
+          --become --become-user=root \
+          --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" \
+          ${{ env.ANSIBLE_PLAYBOOK }}
+
