@@ -10,10 +10,6 @@ env:
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} 
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-  REMOTE_USER: my-remote-user
-  REMOTE_HOST: 123.45.67.89
   ANSIBLE_INVENTORY: hosts
   ANSIBLE_PLAYBOOK: playbook.yaml
 
@@ -41,7 +37,3 @@ jobs:
           context: .
           push: true
           tags: chyngyz91/myappgo
-   
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
