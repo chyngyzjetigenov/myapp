@@ -42,11 +42,10 @@ jobs:
 
     steps:
           
-       - name: Deploy APIService
+       - name: Deploy with Ansible
          uses: dawidd6/action-ansible-playbook@v2
          with:
-          playbook: playbook.yml
-          directory: myapp/
+          playbook: ./playbook.yml
           key: ${{secrets.KART_SSH_PRIV_KEY}}
           inventory: |
            [all]
