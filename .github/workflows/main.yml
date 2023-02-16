@@ -8,13 +8,10 @@ on:
 env:
   SERVICE_NAME: my-app
   IMAGE_TAG: ${{ github.sha }}
-  DOCKER_REGISTRY_URL: ghcr.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-  REMOTE_USER: my-remote-user
-  REMOTE_HOST: 123.45.67.89
   ANSIBLE_INVENTORY: hosts
   ANSIBLE_PLAYBOOK: playbook.yaml
 
