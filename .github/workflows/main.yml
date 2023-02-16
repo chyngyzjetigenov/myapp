@@ -15,8 +15,8 @@ env:
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
   REMOTE_USER: jetigenov
   REMOTE_HOST: 192.168.1.112
-  ANSIBLE_INVENTORY: ../hosts
-  ANSIBLE_PLAYBOOK: ../playbook.yml
+  ANSIBLE_INVENTORY: ./hosts
+  ANSIBLE_PLAYBOOK: ./playbook.yml
 
 jobs:
   build-and-push:
@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ../Dockerfile
+          file: ./Dockerfile
           push: true
           tags: chyngyz91/myappgo
   deploy:
@@ -51,4 +51,4 @@ jobs:
           
       - name: Deploy with Ansible
         run: |
-          ansible-playbook -i ${{ env.ANSIBLE_INVENTORY }} -u ${{ env.REMOTE_USER }} --become --become-user=root --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" ${{ env.ANSIBLE_PLAYBOOK }}
+          ansible-playbook -i ./hosts -u ${{ env.REMOTE_USER }} --become --become-user=root --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" ./playbook.yml
