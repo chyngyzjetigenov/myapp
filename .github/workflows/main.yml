@@ -42,7 +42,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myappgo:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myappgo
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
