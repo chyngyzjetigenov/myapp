@@ -12,10 +12,10 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-  REMOTE_USER: my-remote-user
+  REMOTE_USER: jetigenov
   REMOTE_HOST: 192.168.1.112
-  ANSIBLE_INVENTORY: ../hosts
-  ANSIBLE_PLAYBOOK: ../playbook.yml
+  ANSIBLE_INVENTORY: hosts
+  ANSIBLE_PLAYBOOK: playbook.yml
 
 jobs:
   build-and-push:
