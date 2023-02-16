@@ -14,8 +14,8 @@ env:
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
   REMOTE_USER: my-remote-user
   REMOTE_HOST: 192.168.1.112
-  ANSIBLE_INVENTORY: hosts
-  ANSIBLE_PLAYBOOK: playbook.yml
+  ANSIBLE_INVENTORY: ./hosts
+  ANSIBLE_PLAYBOOK: ./playbook.yml
 
 jobs:
   build-and-push:
