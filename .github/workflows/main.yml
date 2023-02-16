@@ -9,9 +9,11 @@ env:
   SERVICE_NAME: chyngyz91
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} 
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+  REMOTE_USER: my-remote-user
+  REMOTE_HOST: 123.45.67.89
   ANSIBLE_INVENTORY: hosts
   ANSIBLE_PLAYBOOK: playbook.yaml
 
@@ -59,5 +61,5 @@ jobs:
           -i ${{ env.ANSIBLE_INVENTORY }} \
           -u ${{ env.REMOTE_USER }} \
           --become --become-user=root \
-          --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" \
+          --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=myappgo" \
           ${{ env.ANSIBLE_PLAYBOOK }}
