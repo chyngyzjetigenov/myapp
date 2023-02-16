@@ -14,8 +14,8 @@ env:
   SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
   REMOTE_USER: my-remote-user
   REMOTE_HOST: 192.168.1.112
-  ANSIBLE_INVENTORY: ./hosts
-  ANSIBLE_PLAYBOOK: ./playbook.yml
+  ANSIBLE_INVENTORY: ../hosts
+  ANSIBLE_PLAYBOOK: ../playbook.yml
 
 jobs:
   build-and-push:
@@ -46,16 +46,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
+   
       - name: Copy SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
           ssh-keyscan -t rsa ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with Ansible
