@@ -12,15 +12,9 @@
         recreate: no
 
     - name: Remove stopped containers
-      shell: |
-        docker ps -a --filter "name={{ lookup('env', 'SERVICE_NAME') }}" --format "{{ '{{' }}.Names{{ '}}' }}"
+      ansible.builtin.shell:
+        docker rm '{{ lookup("env","SERVICE_NAME") }}'
       register: containers_to_remove
-
-    - name: Remove stopped containers
-      docker_container:
-        name: "{{ item }}"
-        state: absent
-      loop: "{{ containers_to_remove.stdout_lines }}"
 
     - name: Pull image
       docker_image:
