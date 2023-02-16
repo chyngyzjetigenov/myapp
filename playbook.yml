@@ -1,26 +1,37 @@
-- name: Install dependencies
-  apt:
-    name: golang
+---
+- name: Deploy Docker container
+  hosts: all
+  become: true
+  gather_facts: false
 
-- name: Copy application files
-  copy:
-    src: /home/jetigenov/myapp
-    dest: /opt/myapp
+  tasks:
+    - name: Stop running containers
+      docker_container:
+        name: "{{ lookup('env', 'SERVICE_NAME') }}"
+        state: stopped
+        recreate: no
 
-- name: Build application
-  command: go build -o /opt/myapp/myapp /opt/myapp/main.go
+    - name: Remove stopped containers
+      shell: |
+        docker ps -a --filter "name={{ lookup('env', 'SERVICE_NAME') }}" --format "{{ '{{' }}.Names{{ '}}' }}"
+      register: containers_to_remove
 
-- name: Create systemd service
-  copy:
-    src: system/serverapp.service
-    dest: /etc/systemd/system/serverapp.service
+    - name: Remove stopped containers
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ containers_to_remove.stdout_lines }}"
 
-- name: Reload systemd
-  systemd:
-    daemon_reload: yes
+    - name: Pull image
+      docker_image:
+        name: "{{ lookup('env', 'IMAGE') }}"
+        source: pull
 
-- name: Enable and start systemd service
-  systemd:
-    name: myapp
-    enabled: yes
-    state: started
+    - name: Start container
+      docker_container:
+        name: "{{ lookup('env', 'SERVICE_NAME') }}"
+        image: "{{ lookup('env', 'IMAGE') }}"
+        state: started
+        ports:
+          - "8080:8080"
+        restart_policy: always
