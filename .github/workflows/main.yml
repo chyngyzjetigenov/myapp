@@ -6,8 +6,9 @@ on:
       - '*'
 
 env:
-  SERVICE_NAME: my-app
+  SERVICE_NAME: chngyz91
   IMAGE_TAG: ${{ github.sha }}
+  DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
