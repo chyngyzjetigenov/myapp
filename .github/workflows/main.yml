@@ -50,4 +50,4 @@ jobs:
 
       - name: Deploy with Ansible
         run: |
-         ansible-playbook  --user $USER -i ./hosts  --become --become-user=root ./playbook.yml
+         ansible-playbook --user $USER -i ./hosts --become --become-user=root ./playbook.yml
