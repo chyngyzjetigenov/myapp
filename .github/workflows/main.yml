@@ -1,39 +1,69 @@
-name: Deploy to Production
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - main
+      - '*'
 
 env:
-  IMAGE_NAME: myimage
-  CONTAINER_NAME: mycontainer
-  PROD_SERVER: prod.example.com
+  SERVICE_NAME: my-app
+  IMAGE_TAG: ${{ github.sha }}
+  DOCKER_REGISTRY_URL: ghcr.io
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+  REMOTE_USER: my-remote-user
+  REMOTE_HOST: 123.45.67.89
+  ANSIBLE_INVENTORY: hosts
+  ANSIBLE_PLAYBOOK: playbook.yaml
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Login to Docker Hub
-      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
-    - name: Build Docker image
-      run: docker build -t ${{ env.IMAGE_NAME }} .
+      - name: Build Docker image
+        run: docker build -t ${{ env.SERVICE_NAME }} .
 
-    - name: Push Docker image
-      run: docker push ${{ env.IMAGE_NAME }}
+      - name: Tag Docker image
+        run: docker tag ${{ env.SERVICE_NAME }}:latest ${{ env.DOCKER_REGISTRY_URL }}/${{ env.GITHUB_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-    - name: Deploy to production server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ env.PROD_SERVER }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          docker stop ${{ env.CONTAINER_NAME }} || true
-          docker rm ${{ env.CONTAINER_NAME }} || true
-          docker run -d --name ${{ env.CONTAINER_NAME }} -p 80:80 ${{ env.IMAGE_NAME }}
+      - name: Push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_REGISTRY_URL }}/${{ env.GITHUB_REPOSITORY }}:${{ env.IMAGE_TAG }}
+   
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+   
+      - name: Copy SSH key to agent
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with Ansible
+        run: |
+          sshpass -p "${{ secrets.REMOTE_PASSWORD }}" ansible-playbook \
+          -i ${{ env.ANSIBLE_INVENTORY }} \
+          -u ${{ env.REMOTE_USER }} \
+          --become --become-user=root \
+          --extra-vars "docker_registry_url=${{ env.DOCKER_REGISTRY_URL }} service_name=${{ env.SERVICE_NAME }} image_tag=${{ env.IMAGE_TAG }}" \
+          ${{ env.ANSIBLE_PLAYBOOK }}
