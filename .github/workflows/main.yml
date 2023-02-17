@@ -10,6 +10,7 @@ env:
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
   GITHUB_TOKEN: ${{ github.token }}
 jobs:
   build-and-push:
