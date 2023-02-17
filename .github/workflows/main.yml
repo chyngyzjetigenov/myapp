@@ -42,20 +42,23 @@ jobs:
 
     steps:
     
-       - name: write inventory to file
-         env:
-           INVENTORY: ${{ secrets.INVENTORY }}
-         run: 'echo "$INVENTORY" > ./hosts'
-          
-       - name: Install SSH key
-         uses: shimataro/ssh-key-action@v2
+       - uses: actions/checkout@v3
          with:
-          key: ${{ secrets.SSH_KEY }}
-          name: id_rsa # optional
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-          # config: ${{ secrets.CONFIG }} # ssh_config; optional
-          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
-                 
-       - name: run playbook
+          submodules: true
+          token: ${{secrets.REPO_TOKEN}}
+       - name: Setup SSH 
+         shell: bash
          run: |
-            ansible-playbook -i ./hosts ./playbook.yml
+          eval `ssh-agent -s`
+          mkdir -p /home/jetigenov/.ssh/
+          touch /home/jetigenov/.ssh/id_rsa
+          echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
+          chmod 700 /home/jetigenov/.ssh/id_rsa
+          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_HOST}} >> /home/jetigenov/.ssh/known_hosts
+       - name: Run ansible script
+         shell: bash 
+         run: |
+          service ssh status
+          cd infrastructure/ansible
+          cat setup-prod.yml
+          ansible-playbook -vvv --private-key /home/jetigenov/.ssh/id_rsa -u ${{secrets.ANSIBLE_DEPLOY_USER}} -i hosts playbook.yml
