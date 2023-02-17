@@ -43,5 +43,3 @@ jobs:
       - name: Deplot with ansible
  
         run: ansible-playbook -i ./host.yml ./playbook.yml
-
-
