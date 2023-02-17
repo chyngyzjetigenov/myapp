@@ -40,9 +40,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH 
+      - name: Deplot with ansible
  
-        run: |
-           ansible-playbook -i ./host.yml ./playbook.yml
+        run: ansible-playbook -i ./host.yml ./playbook.yml
 
 
