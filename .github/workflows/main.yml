@@ -40,19 +40,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-
-    - name: set ansible config secrets
+    - name: Checkout mode
+      uses: actions/checkout@v2
+      
+    - name: Install
+      run: sudo apt-get update && sudo apt-get install -y ansible
+      
+    - name: Run
+      run: ansible-playbook -i inventory.yml playbook.yml
       env:
-        ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-        DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
-      run: |
-        echo "$ANSIBLE_VAULT_PASSWORD" > .ansible-vault-password
-        mkdir .ssh
-        echo "$DO_SSH_KEY" > .ssh/id_digitalocean
-        chmod 600 .ssh/id_digitalocean
-    - name: run exporters playbook
-      env:
-        DO_API_KEY: ${{ secrets.DO_API_KEY }}
-      run: |
-        ansible-playbook -i hosts playbook.yml
+         ANSIBLE_HOST_KEY_CHECKING: false
+         ANSIBLE_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
