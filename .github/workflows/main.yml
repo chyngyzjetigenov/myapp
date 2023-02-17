@@ -41,12 +41,7 @@ jobs:
 
     steps:
       - name: Setup SSH 
-        uses: webfactory/ssh-agent@v0.3.0
-        with:
-           ssh-private-key: |
-             ${{ secrets.SSH_PRIVATE_KEY }}
-             ${{ secrets.ANOTHER_SSH_PRIVATE_KEY }}
-      - name: dfsf
+       
         run: |
            mkdir -p ~/.ssh
            echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
