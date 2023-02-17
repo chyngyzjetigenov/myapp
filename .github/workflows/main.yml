@@ -43,7 +43,6 @@ jobs:
       - name: Setup SSH 
  
         run: |
-           ansible-playbook  --user $USER -i ./host.yml  --become --become-user=root ./playbook.yml
-           echo "Successfully deployed!"
+           ansible-playbook -i ./host.yml ./playbook.yml
 
 
