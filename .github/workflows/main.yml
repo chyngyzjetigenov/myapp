@@ -4,6 +4,7 @@ on:
     branches:
     - main
 
+
 env:
   SERVICE_NAME: chyngyz91
   DOCKER_REGISTRY_URL: docker.io
