@@ -30,13 +30,25 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/myapp
     
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy Docker image to production
-        uses: jetigenov/ssh-action@main
-        with:
-          host: ${{ env.PROD_IP_CENTOS }}
-          username: ${{ secrets.PROD_USERNAME }}
-          key: ${{ env.SSH_PRIVATE_KEY }}
-          script: |
-            ansible-playbook /path/to/playbook.yml --extra-vars "image=$DOCKER_USERNAME/$GITHUB_REPOSITORY"
+   if: github.ref != 'refs/heads/master'
+   runs-on: ubuntu-latest
+   needs: build
+   steps:
+   - name: Checkout code
+     uses: actions/checkout@v2
+   - name: Set up SSH key
+     uses: webfactory/ssh-agent@v0.5.0
+     with:
+       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+   - name: Install dependencies
+     run: |
+       sudo apt-get update && \
+       sudo apt-get install -y ansible
+   - name: Deploy app
+     env:
+       DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/myapp
+       DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+       DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+     run: |
+       ansible-playbook -i ansible/inventory/hosts.ini --user ${{ secrets.SSH_USER }} ansible/playbook.yml
+
