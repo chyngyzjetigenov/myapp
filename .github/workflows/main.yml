@@ -34,7 +34,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${env.DOCKER_USERNAME}/${env.SERVICE_NAME}
+          tags: ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}
 
   deploy:
     runs-on: ubuntu-latest
