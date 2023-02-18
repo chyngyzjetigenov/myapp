@@ -1,4 +1,0 @@
-all:
-   hosts:
-     centos:
-       ansible_host: '{{ lookup("env","prod_ip_centos") }}'
