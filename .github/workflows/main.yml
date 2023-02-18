@@ -24,9 +24,7 @@ jobs:
           ansible-galaxy collection install community.docker
           
   deploy:
-     runs-on: ubuntu-latest
-     steps:
-      - name: Build, push, and deploy Docker image
-        run: |
-          ansible-playbook playbook.yml \
-          --extra-vars "docker_registry_username=$DOCKER_USERNAME docker_registry_password=$DOCKER_PASSWORD"
+   runs-on: ubuntu-latest
+   steps:
+    - name: Deploy Docker image
+      run: ansible-playbook playbook.yml --extra-vars "docker_registry_username=$DOCKER_USERNAME docker_registry_password=$DOCKER_PASSWORD"
