@@ -1,29 +1,33 @@
 name: Build-Push-Deploy-Docker-Image
+
 on:
   push:
     branches:
-    - "main"
+      - "main"
 
 env:
-  SERVICE_NAME: chyngyz91
+  SERVICE_NAME: myapp
   DOCKER_REGISTRY_URL: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  
+  PROD_IP_CENTOS: 192.168.1.112
+  USER: jetigenov
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
       - name: Build Docker image
-        run: docker build -t ${{ env.SERVICE_NAME }} .
+        run: docker build -t ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}:latest .
 
       - name: Push Docker image
         uses: docker/build-push-action@v2
@@ -31,23 +35,19 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: chyngyz91/myappgo
+          tags: ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}:latest
 
   deploy:
-     runs-on: ubuntu-latest
-     needs: build # The build job should finished successfully.
-     
-     steps:
-      
-      - name: deploy
+    runs-on: ubuntu-latest
+    needs: build # The build job should finish successfully.
+    steps:
+      - name: Deploy
         run: |
-            - mkdir -p ~/.ssh
-            - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-            - chmod 600 ~/.ssh/id_rsa
-            - eval "$(ssh-agent -s)"
-            - ssh-add ~/.ssh/id_rsa
-            - ssh-keyscan -H $prod_ip_centos >> ~/.ssh/known_hosts
-            - export image=$CI_REGISTRY_USER/$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-      - name: deploy
-        run: |
-            - ansible-playbook --user $USER -i actions/ansible/inventory.yml  --become --become-user=root actions/ansible/playbook.yml
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -H ${env.PROD_IP_CENTOS} >> ~/.ssh/known_hosts
+          export image=${{ env.DOCKER_REGISTRY_URL }}/${{ env.SERVICE_NAME }}:latest
+          ansible-playbook --user ${{ env.USER }} -i ./inventory.yml --become --become-user=root ./playbook.yml
