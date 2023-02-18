@@ -1,5 +1,9 @@
 FROM golang:alpine
 
+RUN apk add --update ansible
+COPY entrypoint.sh /.
+ENTRYPOINT ["entrypoint.sh"]
+
 WORKDIR /app
 
 COPY main.go .
