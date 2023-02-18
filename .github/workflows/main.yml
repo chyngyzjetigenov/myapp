@@ -27,7 +27,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/$GITHUB_REPOSITORY
+          tags: ${{ secrets.DOCKER_USERNAME }}/myapp
     
   deploy:
     runs-on: ubuntu-latest
