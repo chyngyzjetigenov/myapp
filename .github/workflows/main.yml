@@ -2,8 +2,7 @@ name: Build-Push-Deploy-Docker-Image
 on:
   push:
     branches:
-    - main
-
+    - "main"
 
 env:
   SERVICE_NAME: chyngyz91
