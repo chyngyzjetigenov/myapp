@@ -1,0 +1,32 @@
+---
+- name: Build, Push, and Deploy Docker Image
+  hosts: localhost
+  gather_facts: no
+  vars:
+    docker_image: myappgo
+    docker_registry: chyngyz91
+    docker_registry_username: ${{ secrets.DOCKER_USERNAME }}
+    docker_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+  tasks:
+    - name: Build Docker Image
+      community.docker.docker_build:
+        path: .
+        tag: "{{ docker_registry }}/{{ docker_image }}:latest"
+
+    - name: Login to Docker Registry
+      community.docker.docker_login:
+        username: "{{ docker_registry_username }}"
+        password: "{{ docker_registry_password }}"
+        registry_url: "{{ docker_registry }}"
+
+    - name: Push Docker Image
+      community.docker.docker_image:
+        name: "{{ docker_registry }}/{{ docker_image }}"
+        push: yes
+
+    - name: Deploy Docker Container
+      community.general.docker_container:
+        name: "{{ docker_image }}"
+        image: "{{ docker_registry }}/{{ docker_image }}:latest"
+        state: started
+        restart_policy: always
