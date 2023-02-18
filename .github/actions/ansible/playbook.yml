@@ -33,15 +33,15 @@
 
     ### Actual Deploy of the app new version
     - name: Backup Stack File
-      shell: "cp -vf /home/deploy/<app>/<stack>.yaml /home/deploy/<app>/<stack>.yaml.bak"
+      shell: "cp -vf /home/deploy/<app>/<stack>.yml /home/deploy/<app>/<stack>.yml.bak"
       when:  result.stdout == "<hostname>"
 
     - name: Modify the App Version
-      shell: sed -i -E 's/app:[0-9\.]+/{{ NEW_IMAGE_TAG }}/g' /home/deploy/<app>/<stack>.yaml
+      shell: sed -i -E 's/app:[0-9\.]+/{{ NEW_IMAGE_TAG }}/g' /home/deploy/<app>/<stack>.yml
       when:  result.stdout == "<hostname>"
 
     - name: Restart Stack to Pull Image
-      shell: "docker stack deploy -c /home/deploy/<app>/<stack>.yaml <app>-stack --with-registry-auth"
+      shell: "docker stack deploy -c /home/deploy/<app>/<stack>.yml <app>-stack --with-registry-auth"
       when:  result.stdout == "<hostname>"
 
     - name: Sleep for 10 seconds 
