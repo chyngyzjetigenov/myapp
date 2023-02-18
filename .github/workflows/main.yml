@@ -34,20 +34,7 @@ jobs:
           tags: chyngyz91/myappgo
 
   deployAnsible:
-    if: inputs.action == 'both'
     needs: build
-    runs-on: ubuntu-latest
-    env: 
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
-      NEW_IMAGE_TAG: app:${{ inputs.imageTag }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/ansible
-        with: 
-          playbook: ./.github/ansible/playbook.yml
-          inventory: ./.github/ansible/inventory
-
-  testDeployAnsible:
     runs-on: ubuntu-latest
     env: 
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
