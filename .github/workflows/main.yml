@@ -1,11 +1,17 @@
 name: Build-Push-Deploy-Docker-Image
 on:
-  push:
-    branches:
-    - "main"
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: "Image Tag"
+        required: true
+        default: "0.0.0"
+      action:
+        description: "Both runs CI/CD Stages"
+        required: true
+        default: "both"
 jobs:
   build:
-    if: inputs.action == 'both'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
