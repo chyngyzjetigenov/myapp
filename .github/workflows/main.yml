@@ -25,7 +25,9 @@ jobs:
         run: |
           docker build -t $DOCKER_USERNAME/$GITHUB_REPOSITORY:${GITHUB_SHA::8} .
           docker push $DOCKER_USERNAME/$GITHUB_REPOSITORY:${GITHUB_SHA::8}
-
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy Docker image to production
         uses: appleboy/ssh-action@master
         with:
