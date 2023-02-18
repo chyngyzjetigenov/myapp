@@ -36,6 +36,7 @@ jobs:
           push: true
           tags: chyngyz91/myappgo
 
+
   deploy:
      runs-on: ubuntu-latest
      steps:
