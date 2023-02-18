@@ -40,8 +40,8 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
       NEW_IMAGE_TAG: app:${{ inputs.imageTag }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/ansible
-        with: 
-          playbook: ./.github/ansible/playbook.yml
-          inventory: ./.github/ansible/inventory
+        - uses: actions/checkout@v1
+        - uses: ./.github/ansible
+          with: 
+            playbook: playbook.yml
+            inventory: localhost
