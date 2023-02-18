@@ -2,7 +2,7 @@ name: Build-Push-Deploy-Docker-Image
 on:
   push:
     branches:
-    - main
+    - "main"
 jobs:
   build:
     if: inputs.action == 'both'
