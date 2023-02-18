@@ -22,7 +22,9 @@ jobs:
           sudo apt-get install -y python3-pip && \
           pip3 install ansible && \
           ansible-galaxy collection install community.docker
-
+  deploy:
+     runs-on: ubuntu-latest
+     steps:
       - name: Build, push, and deploy Docker image
         run: |
           ansible-playbook playbook.yml \
