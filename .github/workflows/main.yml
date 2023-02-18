@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PROD_IP_CENTOS: 192.168.1.112
+  prod_ip_ubuntu: 192.168.1.112
 
 jobs:
   build:
