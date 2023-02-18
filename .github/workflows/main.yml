@@ -50,5 +50,5 @@ jobs:
        DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_USERNAME }}
        DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
      run: |
-       ansible-playbook -i ansible/inventory/hosts.ini --user ${{ secrets.SSH_USER }} ansible/playbook.yml
+       ansible-playbook --user ${{ secrets.SSH_USER }} -i ./ansible/inventory/hosts.ini ./ansible/playbook.yml
 
