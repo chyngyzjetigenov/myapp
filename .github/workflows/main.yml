@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Docker image to production
-        uses: appleboy/ssh-action@master
+        uses: jetigenov/ssh-action@main
         with:
           host: ${{ env.PROD_IP_CENTOS }}
           username: ${{ secrets.PROD_USERNAME }}
