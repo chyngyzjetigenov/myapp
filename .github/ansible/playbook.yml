@@ -1,32 +1,20 @@
 ---
-- name: Build, Push, and Deploy Docker Image
-  hosts: all
-  gather_facts: no
-  vars:
-    docker_image: myappgo
-    docker_registry: chyngyz91
-    docker_registry_username: ${{ secrets.DOCKER_USERNAME }}
-    docker_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+- hosts: all
+  name: Ubuntu
+  become: true
   tasks:
-    - name: Build Docker Image
-      community.docker.docker_build:
-        path: .
-        tag: "{{ docker_registry }}/{{ docker_image }}:latest"
-
-    - name: Login to Docker Registry
-      community.docker.docker_login:
-        username: "{{ docker_registry_username }}"
-        password: "{{ docker_registry_password }}"
-        registry_url: "{{ docker_registry }}"
-
-    - name: Push Docker Image
-      community.docker.docker_image:
-        name: "{{ docker_registry }}/{{ docker_image }}"
-        push: yes
-
-    - name: Deploy Docker Container
-      community.general.docker_container:
-        name: "{{ docker_image }}"
-        image: "{{ docker_registry }}/{{ docker_image }}:latest"
-        state: started
+    - name: Stop running containers
+      docker_container:
+        name: '{{ lookup("env","SERVICE_NAME") }}'
+        state: stopped
+        recreate: no
+    - name: Remove Stoped docker containers
+      ansible.builtin.shell:
+          docker rm '{{ lookup("env","SERVICE_NAME") }}'
+    - name: Pull image and start docker container 
+      community.docker.docker_container:
+        name: '{{ lookup("env","SERVICE_NAME") }}'
+        image: '{{ lookup("env","image") }}'
+        ports:
+          - "8080:8080"
         restart_policy: always
