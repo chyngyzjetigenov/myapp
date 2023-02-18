@@ -1,58 +1,20 @@
 ---
 - hosts: all
-  remote_user: deploy
-  gather_facts: false
-
-  pre_tasks:
-    - name: Loading environment variables
-      tags: always
-      set_fact:
-        SSH_PRIVATE_KEY: "{{ lookup('env', 'SSH_PRIVATE_KEY') }}"
-        NEW_IMAGE_TAG: "{{ lookup('env', 'NEW_IMAGE_TAG') }}"
-
+  name: Pl
+  become: true
   tasks:
-    - name: create .ssh directory
-      file:
-        path: /root/.ssh/
-        state: directory
-        mode: '0600'
-      delegate_to: localhost
-      delegate_facts: true
-
-    - name: Write SSH Key 
-      copy:
-        content: "{{ SSH_PRIVATE_KEY }}"
-        dest: /root/.ssh/ansible_key
-        mode: 0400 
-      delegate_to: localhost
-      delegate_facts: true
-
-    - name: Get hostname
-      shell: echo "$(hostname)"
-      register: result
-
-    ### Actual Deploy of the app new version
-    - name: Backup Stack File
-      shell: "cp -vf /home/deploy/<app>/<stack>.yml /home/deploy/<app>/<stack>.yml.bak"
-      when:  result.stdout == "<hostname>"
-
-    - name: Modify the App Version
-      shell: sed -i -E 's/app:[0-9\.]+/{{ NEW_IMAGE_TAG }}/g' /home/deploy/<app>/<stack>.yml
-      when:  result.stdout == "<hostname>"
-
-    - name: Restart Stack to Pull Image
-      shell: "docker stack deploy -c /home/deploy/<app>/<stack>.yml <app>-stack --with-registry-auth"
-      when:  result.stdout == "<hostname>"
-
-    - name: Sleep for 10 seconds 
-      ansible.builtin.wait_for:
-        timeout: 10
-      delegate_to: localhost
-
-    - name:  List the deployed Docker Swarm Serv
-      shell: "docker service ls"
-      when:  result.stdout == "<hostname>"
-
-    - name:  List the deployed Docker Swarm Serv
-      shell: "docker ps -a --filter status=running"
-      when:  result.stdout == "<hostname>"
+    - name: Stopped
+      docker_container:
+        name: '{{ lookup("env","SERVICE_NAME") }}'
+        state: stopped
+        recreate: no
+    - name: Remove Stopped
+      ansible.builtin.shell:
+          docker rm '{{ lookup("env","SERVICE_NAME") }}'
+    - name: Pull image and start docker container 
+      community.docker.docker_container:
+        name: '{{ lookup("env","SERVICE_NAME") }}'
+        image: '{{ lookup("env","image") }}'
+        ports:
+          - "8080:8080"
+        restart_policy: always
