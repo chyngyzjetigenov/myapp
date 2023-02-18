@@ -1,4 +1,4 @@
-name: Build, Push, and Deploy Docker Image
+name: Build and Deploy Docker Image
 
 on:
   push:
@@ -6,8 +6,10 @@ on:
       - main
 
 env:
-    docker_registry_username: ${{ secrets.DOCKER_USERNAME }}
-    docker_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  PROD_IP_CENTOS: 192.168.1.112
 
 jobs:
   build:
@@ -16,15 +18,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Login to Docker registry
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      - name: Build and push Docker image
         run: |
-          sudo apt-get update && \
-          sudo apt-get install -y python3-pip && \
-          pip3 install ansible && \
-          ansible-galaxy collection install community.docker
-          
-  deploy:
-   runs-on: ubuntu-latest
-   steps:
-    - name: Deploy Docker image
-      run: ansible-playbook playbook.yml --extra-vars "docker_registry_username=$DOCKER_USERNAME docker_registry_password=$DOCKER_PASSWORD"
+          docker build -t $DOCKER_USERNAME/$GITHUB_REPOSITORY:${GITHUB_SHA::8} .
+          docker push $DOCKER_USERNAME/$GITHUB_REPOSITORY:${GITHUB_SHA::8}
+
+      - name: Deploy Docker image to production
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.PROD_IP_CENTOS }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            ansible-playbook /path/to/playbook.yml --extra-vars "image=$DOCKER_USERNAME/$GITHUB_REPOSITORY:${GITHUB_SHA::8}"
