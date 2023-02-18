@@ -36,10 +36,10 @@ jobs:
           push: true
           tags: chyngyz91/myappgo
   deploy:
-    needs: build-and-push
     runs-on: ubuntu-latest
-
+    needs: build # The build job should finished successfully.
     steps:
-      - name: Deplot with ansible
- 
-        run: ansible-playbook -i ./host.yml ./playbook.yml
+      - uses: actions/checkout@v1
+      - uses: ./.github/actions/deploy
+        env:
+          VAULT_PASS: ${{ secrets.VAULT_PASS }}
