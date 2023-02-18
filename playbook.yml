@@ -3,14 +3,6 @@
   name: Ubuntu
   become: true
   tasks:
-    - name: Stop running containers
-      docker_container:
-        name: '{{ lookup("env","SERVICE_NAME") }}'
-        state: stopped
-        recreate: no
-    - name: Remove Stoped docker containers
-      ansible.builtin.shell:
-          docker rm '{{ lookup("env","SERVICE_NAME") }}'
     - name: Pull image and start docker container 
       community.docker.docker_container:
         name: '{{ lookup("env","SERVICE_NAME") }}'
