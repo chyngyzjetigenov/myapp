@@ -1,39 +1,45 @@
-name: deploy ansible
+name: Build and Deploy
 
 on:
   push:
     branches:
-     - "main"
-  pull_request:
-    branches:
-     - "main"
+      - "main"
 
+env:
+  SERVICE_NAME: chyngyz91
+  DOCKER_REGISTRY_URL: docker.io
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 jobs:
-  build:
-   runs-on: ubuntu-latest
-   steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Login to Docker Hub
-          uses: docker/login-action@v2
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v2
-        - name: Build and push
-          uses: docker/build-push-action@v4
-          with:
-           context: .
-           file: ./Dockerfile
-           push: true
-           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-app-go:latest
-  deployAnsible:
-    needs: build
+  build-and-push:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v1
-    - uses: ./.github/actions/deploy/ansible
-      with: 
-        playbook: playbook.yml
-        inventory: localhost
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.SERVICE_NAME }} .
+
+      - name: Push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: chyngyz91/myappgo
+
+  deploy:
+     runs-on: ubuntu-latest
+     steps:
+      - uses: actions/checkout@v1
+      - uses: ./.github/actions/deploy
+        env:
+            VAULT_PASS: ${{ secrets.VAULT_PASS }}
