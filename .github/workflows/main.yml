@@ -7,7 +7,7 @@ on:
 
 env:
   SERVICE_NAME: myapp
-  DOCKER_REGISTRY_URL: docker.io
+  DOCKER_REGISTRY_URL: chyngyz91
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   PROD_IP_CENTOS: 192.168.1.112
@@ -27,7 +27,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}:latest .
+        run: docker build -t ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME} .
 
       - name: Push Docker image
         uses: docker/build-push-action@v2
@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}:latest
+          tags: ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}
 
   deploy:
     runs-on: ubuntu-latest
