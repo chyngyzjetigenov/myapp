@@ -1,11 +1,9 @@
 #!/bin/sh
-mkdir ~/.ssh
-echo $VAULT_PASS > /vault_password_file.txt
-ansible-vault decrypt \
---vault-password-file=/vault_password_file.txt \
-id_rsa-encrypted \
---output=~/.ssh/id_rsa
-chmod 0600 ~/.ssh/id_rsa
-ansible-playbook --vault-password-file=/vault_password_file.txt \
--i ansible/hosts \
-ansible/deploy.yml
+ mkdir -p ~/.ssh
+ echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+ chmod 600 ~/.ssh/id_rsa
+ eval "$(ssh-agent -s)"
+ ssh-add ~/.ssh/id_rsa
+ ssh-keyscan -H $prod_ip_centos >> ~/.ssh/known_hosts
+ export image=chyngyz91/myappgo
+
