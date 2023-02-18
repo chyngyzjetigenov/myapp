@@ -35,6 +35,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: chyngyz91/myappgo
+          
   deploy:
     runs-on: ubuntu-latest
     needs: build # The build job should finished successfully.
