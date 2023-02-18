@@ -34,7 +34,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${env.DOCKER_REGISTRY_URL}/${env.SERVICE_NAME}
+          tags: chyngyz91/myappgo
 
   deploy:
     runs-on: ubuntu-latest
