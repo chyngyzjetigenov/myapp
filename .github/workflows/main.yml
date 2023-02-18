@@ -34,7 +34,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${env.SERVICE_NAME}
+          tags: ${env.DOCKER_USERNAME}/${env.SERVICE_NAME}
 
   deploy:
     runs-on: ubuntu-latest
