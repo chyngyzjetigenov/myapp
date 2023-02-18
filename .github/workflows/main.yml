@@ -1,46 +1,66 @@
-name: Build and Deploy
-
+name: Build-Push-Deploy-Docker-Image
 on:
-  push:
-    branches:
-      - "main"
-
-env:
-  SERVICE_NAME: chyngyz91
-  DOCKER_REGISTRY_URL: docker.io
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: "Image Tag"
+        required: true
+        default: "0.0.0"
+      action:
+        description: "Both runs CI/CD Stages"
+        required: true
+        default: "both"
 jobs:
-  build-and-push:
+  build:
+    if: inputs.action == 'both'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
-          registry: ${{ env.DOCKER_REGISTRY_URL }}
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
-      - name: Build Docker image
-        run: docker build -t ${{ env.SERVICE_NAME }} .
-
-      - name: Push Docker image
-        uses: docker/build-push-action@v2
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Prep Docker Image (Metadata)
+        id: meta
+        uses: docker/metadata-action@v4
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: chyngyz91/myappgo
+          images: myappgo
+          tags: ${{ inputs.imageTag }} # Tag
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
+  deployAnsible:
+    if: inputs.action == 'both'
+    needs: build
+    runs-on: ubuntu-latest
+    env: 
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
+      NEW_IMAGE_TAG: app:${{ inputs.imageTag }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with: 
+          playbook: ./playbook.yml
+          inventory: ./inventory.yml
 
-  deploy:
-     runs-on: ubuntu-latest
-     steps:
-      - uses: actions/checkout@v1
-      - uses: ./action.yml
-        env:
-            VAULT_PASS: ${{ secrets.VAULT_PASS }}
+  testDeployAnsible:
+    if: inputs.action == 'test-cd'
+    runs-on: ubuntu-latest
+    env: 
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
+      NEW_IMAGE_TAG: app:${{ inputs.imageTag }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with: 
+          playbook: ./playbook.yml
+          inventory: ./inventory.yml
